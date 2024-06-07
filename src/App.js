@@ -5,7 +5,18 @@ import './index.scss';
 function App() {
   const [fromCurrency, setFromCurrency] = React.useState('EUR');
   const [toCurrency, setToCurrency] = React.useState('USD');
+  const [fromValue, setFromValue] = React.useState(0);
+  const [toValue, setToValue] = React.useState(0);
+
   const [rates, setRates] = React.useState({});
+
+  const onChangeFromValue = (value) => {
+    setFromValue(value);
+  }
+
+  const onChangeToValue = (value) => {
+    setToValue(value);
+  }
 
   React.useEffect(() => {
     fetch('https://api.frankfurter.app/latest')
@@ -21,8 +32,18 @@ function App() {
 
   return (
     <div className="App">
-      <Block value={0} currency={fromCurrency} onChangeCurrency={setFromCurrency} />
-      <Block value={0} currency={toCurrency} onChangeCurrency={setToCurrency} />
+      <Block 
+      value={fromValue} 
+      currency={fromCurrency} 
+      onChangeCurrency={setFromCurrency} 
+      onChangeValue={onChangeFromValue}
+      />
+      <Block 
+      value={toValue} 
+      currency={toCurrency} 
+      onChangeCurrency={setToCurrency} 
+      onChangeValue={onChangeToValue}
+      />
     </div>
   );
 }
