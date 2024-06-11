@@ -11,23 +11,37 @@ function App() {
   const [rates, setRates] = React.useState({});
 
   const onChangeFromValue = (value) => {
-    //Rates quote against the Euro by default
-    const fromRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
-    const toRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
-    const euroValue = value / fromRate;
-    const result = euroValue * toRate;
-    setToValue(result);
+    // If the rates are not loaded yet, we don't need to calculate the rate
+    if (Object.keys(rates).length > 0) {
+      // If the from currency is EUR, we don't need to calculate the rate
+      const fromRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
+      const toRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
+      const euroValue = value / fromRate;
+      const result = euroValue * toRate;
+      setToValue(result);
+    }
     setFromValue(value);
   }
 
   const onChangeToValue = (value) => {
-    const fromRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
-    const toRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
-    const euroValue = value / fromRate;
-    const result = euroValue * toRate;
-    setFromValue(result);
+    if (Object.keys(rates).length > 0) {
+      const fromRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
+      const toRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
+      const euroValue = value / fromRate;
+      const result = euroValue * toRate;
+      setFromValue(result);
+    }
     setToValue(value);
   }
+
+ React.useEffect(() => {
+  onChangeFromValue(fromValue);
+ }, [fromCurrency, fromValue]);
+
+ React.useEffect(() => {
+  onChangeToValue(toValue);
+ }, [toCurrency, toValue]);
+
 
   React.useEffect(() => {
     fetch('https://api.frankfurter.app/latest')
