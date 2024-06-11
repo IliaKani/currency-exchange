@@ -7,29 +7,25 @@ function App() {
   const [toCurrency, setToCurrency] = React.useState('USD');
   const [fromValue, setFromValue] = React.useState(1);
   const [toValue, setToValue] = React.useState(0);
-  // We will store the exchange rates in this state
   const ratesRef = React.useRef({});
 
+  const calculateConversion = (value, fromCurrency, toCurrency) => {
+    const fromRate = fromCurrency === 'EUR' ? 1 : ratesRef.current[fromCurrency];
+    const toRate = toCurrency === 'EUR' ? 1 : ratesRef.current[toCurrency];
+    const euroValue = value / fromRate;
+    return euroValue * toRate;
+  }
+
   const onChangeFromValue = (value) => {
-    // If the rates are not loaded yet, we don't need to calculate the rate
     if (Object.keys(ratesRef.current).length > 0) {
-      // If the from currency is EUR, we don't need to calculate the rate
-      const fromRate = fromCurrency === 'EUR' ? 1 : ratesRef.current[fromCurrency];
-      const toRate = toCurrency === 'EUR' ? 1 : ratesRef.current[toCurrency];
-      const euroValue = value / fromRate;
-      const result = euroValue * toRate;
-      setToValue(result);
+      setToValue(calculateConversion(value, fromCurrency, toCurrency));
     }
     setFromValue(value);
   }
 
   const onChangeToValue = (value) => {
     if (Object.keys(ratesRef.current).length > 0) {
-      const fromRate = toCurrency === 'EUR' ? 1 : ratesRef.current[toCurrency];
-      const toRate = fromCurrency === 'EUR' ? 1 : ratesRef.current[fromCurrency];
-      const euroValue = value / fromRate;
-      const result = euroValue * toRate;
-      setFromValue(result);
+      setFromValue(calculateConversion(value, toCurrency, fromCurrency));
     }
     setToValue(value);
   }
@@ -42,32 +38,34 @@ function App() {
     onChangeToValue(toValue);
   }, [toCurrency, toValue]);
 
-
   React.useEffect(() => {
-    fetch('https://api.frankfurter.app/latest')
-    .then((res) => res.json())
-    .then((json) => {
-      ratesRef.current = json.rates;
-      onChangeFromValue(1);
-    }).catch((err) => {
-      console.error(err);
-      alert('Failed to load exchange rates');
-    });
-  }, [])
+    const fetchRates = async () => {
+      try {
+        const res = await fetch('https://api.frankfurter.app/latest');
+        const json = await res.json();
+        ratesRef.current = json.rates;
+        onChangeFromValue(1);
+      } catch (err) {
+        console.error(err);
+        alert('Failed to load exchange rates');
+      }
+    }
+    fetchRates();
+  }, []);
 
   return (
     <div className="App">
       <Block 
-      value={fromValue} 
-      currency={fromCurrency} 
-      onChangeCurrency={setFromCurrency} 
-      onChangeValue={onChangeFromValue}
+        value={fromValue} 
+        currency={fromCurrency} 
+        onChangeCurrency={setFromCurrency} 
+        onChangeValue={onChangeFromValue}
       />
       <Block 
-      value={toValue} 
-      currency={toCurrency} 
-      onChangeCurrency={setToCurrency} 
-      onChangeValue={onChangeToValue}
+        value={toValue} 
+        currency={toCurrency} 
+        onChangeCurrency={setToCurrency} 
+        onChangeValue={onChangeToValue}
       />
     </div>
   );
