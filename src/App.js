@@ -11,10 +11,21 @@ function App() {
   const [rates, setRates] = React.useState({});
 
   const onChangeFromValue = (value) => {
+    //Rates quote against the Euro by default
+    const fromRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
+    const toRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
+    const euroValue = value / fromRate;
+    const result = euroValue * toRate;
+    setToValue(result);
     setFromValue(value);
   }
 
   const onChangeToValue = (value) => {
+    const fromRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
+    const toRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
+    const euroValue = value / fromRate;
+    const result = euroValue * toRate;
+    setFromValue(result);
     setToValue(value);
   }
 
