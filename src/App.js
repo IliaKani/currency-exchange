@@ -7,36 +7,38 @@ function App() {
   const [toCurrency, setToCurrency] = React.useState('USD');
   const [fromValue, setFromValue] = React.useState(1);
   const [toValue, setToValue] = React.useState(0);
+  const [activeField, setActiveField] = React.useState('from'); // Set default active field
   const ratesRef = React.useRef({});
 
   const calculateConversion = (value, fromCurrency, toCurrency) => {
     const fromRate = fromCurrency === 'EUR' ? 1 : ratesRef.current[fromCurrency];
     const toRate = toCurrency === 'EUR' ? 1 : ratesRef.current[toCurrency];
     const euroValue = value / fromRate;
-    return euroValue * toRate;
+    return Number((euroValue * toRate).toFixed(2));
   }
 
   const onChangeFromValue = (value) => {
-    if (Object.keys(ratesRef.current).length > 0) {
+    setFromValue(value);
+    if (activeField === 'from' && Object.keys(ratesRef.current).length > 0) {
       setToValue(calculateConversion(value, fromCurrency, toCurrency));
     }
-    setFromValue(value);
   }
 
   const onChangeToValue = (value) => {
-    if (Object.keys(ratesRef.current).length > 0) {
+    setToValue(value);
+    if (activeField === 'to' && Object.keys(ratesRef.current).length > 0) {
       setFromValue(calculateConversion(value, toCurrency, fromCurrency));
     }
-    setToValue(value);
   }
 
-  React.useEffect(() => {
-    onChangeFromValue(fromValue);
-  }, [fromCurrency, fromValue]);
 
   React.useEffect(() => {
-    onChangeToValue(toValue);
-  }, [toCurrency, toValue]);
+    if (activeField === 'from') {
+      setToValue(calculateConversion(fromValue, fromCurrency, toCurrency));
+    } else {
+      setFromValue(calculateConversion(toValue, toCurrency, fromCurrency));
+    }
+  }, [fromCurrency, toCurrency]);
 
   React.useEffect(() => {
     const fetchRates = async () => {
@@ -60,12 +62,14 @@ function App() {
         currency={fromCurrency} 
         onChangeCurrency={setFromCurrency} 
         onChangeValue={onChangeFromValue}
+        onClick={() => setActiveField('from')} // Set active field on click
       />
       <Block 
         value={toValue} 
         currency={toCurrency} 
         onChangeCurrency={setToCurrency} 
         onChangeValue={onChangeToValue}
+        onClick={() => setActiveField('to')} // Set active field on click
       />
     </div>
   );
