@@ -5,17 +5,17 @@ import './index.scss';
 function App() {
   const [fromCurrency, setFromCurrency] = React.useState('EUR');
   const [toCurrency, setToCurrency] = React.useState('USD');
-  const [fromValue, setFromValue] = React.useState(0);
+  const [fromValue, setFromValue] = React.useState(1);
   const [toValue, setToValue] = React.useState(0);
-
-  const [rates, setRates] = React.useState({});
+  // We will store the exchange rates in this state
+  const ratesRef = React.useRef({});
 
   const onChangeFromValue = (value) => {
     // If the rates are not loaded yet, we don't need to calculate the rate
-    if (Object.keys(rates).length > 0) {
+    if (Object.keys(ratesRef.current).length > 0) {
       // If the from currency is EUR, we don't need to calculate the rate
-      const fromRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
-      const toRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
+      const fromRate = fromCurrency === 'EUR' ? 1 : ratesRef.current[fromCurrency];
+      const toRate = toCurrency === 'EUR' ? 1 : ratesRef.current[toCurrency];
       const euroValue = value / fromRate;
       const result = euroValue * toRate;
       setToValue(result);
@@ -24,9 +24,9 @@ function App() {
   }
 
   const onChangeToValue = (value) => {
-    if (Object.keys(rates).length > 0) {
-      const fromRate = toCurrency === 'EUR' ? 1 : rates[toCurrency];
-      const toRate = fromCurrency === 'EUR' ? 1 : rates[fromCurrency];
+    if (Object.keys(ratesRef.current).length > 0) {
+      const fromRate = toCurrency === 'EUR' ? 1 : ratesRef.current[toCurrency];
+      const toRate = fromCurrency === 'EUR' ? 1 : ratesRef.current[fromCurrency];
       const euroValue = value / fromRate;
       const result = euroValue * toRate;
       setFromValue(result);
@@ -34,21 +34,21 @@ function App() {
     setToValue(value);
   }
 
- React.useEffect(() => {
-  onChangeFromValue(fromValue);
- }, [fromCurrency, fromValue]);
+  React.useEffect(() => {
+    onChangeFromValue(fromValue);
+  }, [fromCurrency, fromValue]);
 
- React.useEffect(() => {
-  onChangeToValue(toValue);
- }, [toCurrency, toValue]);
+  React.useEffect(() => {
+    onChangeToValue(toValue);
+  }, [toCurrency, toValue]);
 
 
   React.useEffect(() => {
     fetch('https://api.frankfurter.app/latest')
     .then((res) => res.json())
     .then((json) => {
-      setRates(json.rates);
-      console.log(json.rates);
+      ratesRef.current = json.rates;
+      onChangeFromValue(1);
     }).catch((err) => {
       console.error(err);
       alert('Failed to load exchange rates');
