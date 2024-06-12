@@ -6,6 +6,7 @@ This is a simple currency converter application built with React.
 
 - Convert between different currencies
 - The value in the inactive field remains the same when the active field's currency is changed
+- Uses the [Frankfurter](https://api.frankfurter.app/latest) API for the latest currency exchange rates
 
 ## Live Demo
 
